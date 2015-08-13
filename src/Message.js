@@ -568,7 +568,7 @@ define(function(require, exports, module) {
      */
     proto.dispose = function () {
         this._loadingInstance = null;
-        this._option.container.html('');
+        this._option.container.innerHTML = '';
         this._changeToStage(LIFE_STAGE.DISPOSED);
     };
 
