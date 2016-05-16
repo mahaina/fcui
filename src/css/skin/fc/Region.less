@@ -5,30 +5,199 @@
 
 /**
  * ESUI Region的DOM结构
- * .skin-ui-fc-region
- * > .skin-ui-fc-region-country-box
- *   > .skin-ui-fc-region-country-check
+ * .skin-ui-fc-fcregion
+ * > .skin-ui-fc-fcregion-country-box
+ *   > .skin-ui-fc-fcregion-country-check
  *     > input
  *     > label
- *   > .skin-ui-fc-region-region-box0
- *   > .skin-ui-fc-region-region-box1
- *     > .skin-ui-fc-region-region-check
+ *   > .skin-ui-fc-fcregion-region-box0
+ *   > .skin-ui-fc-fcregion-region-box1
+ *     > .skin-ui-fc-fcregion-region-check
  *       > input
  *       > label
- *     > .skin-ui-fc-region-province-box
- *       > .skin-ui-fc-region-province-item
- *         > .skin-ui-fc-region-locator
- *           > .skin-ui-fc-region-city-box
+ *     > .skin-ui-fc-fcregion-province-box
+ *       > .skin-ui-fc-fcregion-province-item
+ *         > .skin-ui-fc-fcregion-locator
+ *           > .skin-ui-fc-fcregion-city-box
  *             > table
- *               > .skin-ui-fc-region-city
+ *               > .skin-ui-fc-fcregion-city
  *                 input
  *                 label
  *           b
- *         > .skin-ui-fc-region-text
- *         > .skin-ui-fc-region-text-over
+ *         > .skin-ui-fc-fcregion-text
+ *         > .skin-ui-fc-fcregion-text-over
  *           > input
  *           > label
  */
+
+
+.@{ui-class-prefix}-fcregion {
+    text-align: left;
+    margin: 0;
+    padding: 0;
+    width: 610px;
+    font-size: 12px;
+    color: #000;
+    line-height: 13px;
+    border: 1px solid #DDDDDD;
+    border-bottom: none;
+    .user-select();
+
+    input {
+        float: left;
+        margin: 0px;
+        padding: 0px;
+        width: 13px;
+        height: 13px;
+    }
+
+    label {
+        cursor: default;
+        padding-left: 4px;
+        display: inline;
+    }
+
+    .@{ui-class-prefix}-fcregion-country-box {
+        overflow: hidden;
+        zoom: 1;
+        border-bottom: 1px solid #DDD;
+    }
+
+    .@{ui-class-prefix}-fcregion-country-check {
+        width: 600px;
+        height: 14px;
+        padding: 8px 0 8px 10px;
+        background-color: #F6F6F6;
+        border-top: none;
+    }
+
+    .@{ui-class-prefix}-fcregion-region-box0 {
+        width: 610px;
+        border-top:solid 1px #E6EEF6;
+        background: #F9FCFE;
+        clear: both;
+        .clear-float();
+    }
+
+    .@{ui-class-prefix}-fcregion-region-box1 {
+        width: 610px;
+        clear: both;
+        background: none repeat scroll 0 0 #FFFFFF;
+        border-top: 1px solid #F1F1F1;
+        .clear-float();
+    }
+
+    .@{ui-class-prefix}-fcregion-region-check {
+        width: 90px;
+        padding: 6px 0 6px 10px;
+        float: left;
+
+    }
+
+    .@{ui-class-prefix}-fcregion-province-box {
+        width: 510px;
+        float: left;
+    }
+    .@{ui-class-prefix}-fcregion-province-item {
+        width: 100px;
+        float: left;
+
+        .@{ui-class-prefix}-fcregion-locator {
+            float: right;
+            width: 35px;
+            height: 14px;
+        }
+
+        .@{ui-class-prefix}-fcregion-city-box {
+            border: solid 1px #97A5B2;
+            position: absolute;
+            padding: 3px 0;
+            margin: -1px;
+            background-color: #FFF;
+            z-index: 998;
+            _height: 26px;
+
+            .@{ui-class-prefix}-fcregion-city {
+                height:18px;
+                float: left;
+                padding: 3px 8px;
+            }
+        }
+
+        .@{ui-class-prefix}-fcregion-city-box-over {
+            border: solid 1px #97A5B2;
+            border-right: none;
+            background-color: #FFF;
+            margin: -1px 0;
+            z-index: 999;
+        }
+
+        b {
+            width: 33px;
+            color: #FFF;
+            display: block;
+            text-align: center;
+            font-weight: normal;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #3F8FE1;
+            margin-top: 8px;
+            -moz-border-radius: 3px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+        }
+
+        .@{ui-class-prefix}-fcregion-text {
+            position: relative;
+            zoom: 1;
+            width: 58px;
+            height: 14px;
+            padding: 8px 0 8px 4px;
+            float: right;
+        }
+
+        .@{ui-class-prefix}-fcregion-text-over {
+            border: solid 1px #97A5B2;
+            border-right:none;
+            background-color:#FFF;
+            margin:-1px 0;
+            z-index: 998;
+        }
+    }
+}
+
+.@{ui-class-prefix}-fcregion-single {
+    margin:0;
+    padding:0;
+    width: auto;
+    font-size:12px;
+    border: none;
+}
+
+.@{ui-class-prefix}-fcregion-disabled,
+.@{ui-class-prefix}-fcregion-read-only {
+    color: #999;
+    border-color: #D8D8D8;
+}
+
+/** 验证 */
+.@{ui-class-prefix}-fcregion-validity-invalid {
+    border: 1px solid red;
+}
+.@{ui-class-prefix}-fcregion-validity-label {
+    display:block;
+    margin-top: 5px;
+}
+.@{ui-class-prefix}-fcregion-validity-label-invalid {
+    .background(url(../img/esui-icon-alert.png), no-repeat, 15px, center, #FEDBDC);
+    border: 1px solid #F0CCCC;
+    color: #dd6767;
+    padding-left: 50px;
+}
+
+
+
+
+
 
 // 设定浮层的圆角，阴影和边框
 .set-region-layer() {
@@ -52,24 +221,24 @@
     padding: 0 10px;
     border: none;
 
-    .@{skin-fc-prefix}-region-region-check {
+    .@{skin-fc-prefix}-fcregion-region-check {
         .set-height();
         padding: 0;
 
         width: 120px;
     }
 
-    .@{skin-fc-prefix}-region-province-box {
+    .@{skin-fc-prefix}-fcregion-province-box {
         // 460px == 5个省份+padding
         width: 460px;
 
-        .@{skin-fc-prefix}-region-province-item {
+        .@{skin-fc-prefix}-fcregion-province-item {
             position: relative;
-
+            float: left;
             width: 80px;
             padding-right: 10px;
 
-            .@{skin-fc-prefix}-region-text {
+            .@{skin-fc-prefix}-fcregion-text {
                 .set-height();
 
                 padding: 0 0 0 10px;
@@ -77,11 +246,11 @@
                 float: none;
             }
 
-            .@{skin-fc-prefix}-region-text-over {
+            .@{skin-fc-prefix}-fcregion-text-over {
                 border: 1px solid @skin-fc-text-color-gray-light;
             }
 
-            .@{skin-fc-prefix}-region-locator {
+            .@{skin-fc-prefix}-fcregion-locator {
                 position: absolute;
                 top: 30px;
                 left: 0;
@@ -91,7 +260,7 @@
                     display: none;
                 }
 
-                .@{skin-fc-prefix}-region-city-box {
+                .@{skin-fc-prefix}-fcregion-city-box {
                     .set-region-layer();
 
                     background: @skin-fc-bg-color-gray;
@@ -102,7 +271,7 @@
                         td {
                             padding-left: 10px;
 
-                            .@{skin-fc-prefix}-region-city {
+                            .@{skin-fc-prefix}-fcregion-city {
                                 padding: 0;
                                 line-height: 24px;
                                 height: 24px;
@@ -119,7 +288,7 @@
     }
 }
 
-.@{skin-fc-prefix}-region {
+.@{skin-fc-prefix}-fcregion {
     .set-region-layer();
 
     background: @skin-fc-bg-color-white;
@@ -131,11 +300,11 @@
         float: none;
     }
 
-    .@{skin-fc-prefix}-region-country-box {
+    .@{skin-fc-prefix}-fcregion-country-box {
         border: none;
         overflow: visible;
 
-        .@{skin-fc-prefix}-region-country-check {
+        .@{skin-fc-prefix}-fcregion-country-check {
             .set-height();
 
             width: auto;
@@ -144,8 +313,8 @@
         }
     }
 
-    .@{skin-fc-prefix}-region-region-box0
-    , .@{skin-fc-prefix}-region-region-box1
+    .@{skin-fc-prefix}-fcregion-region-box0
+    , .@{skin-fc-prefix}-fcregion-region-box1
     {
         .set-region-box();
     }
@@ -162,6 +331,6 @@
 }
 
 /* 验证 */
-.skin-ui-fc-region-validity-label {
+.skin-ui-fc-fcregion-validity-label {
     color: @skin-fc-invalid-color;
 }
