@@ -7,5 +7,37 @@
  */
 
 define(function (require) {
-    return require('fcui/main').alias('FcTab', require('esui/Tab'));
+    var _ = require('underscore');
+    var Tab = require('fcui/main').alias('FcTab', require('esui/Tab'));
+
+    /**
+     * @property {Object} tabConfig
+     * 配置一个tab
+     *
+     * @property {string} tabConfig.panel
+     * tab所打开的panel名字
+     *
+     * @property {string} tabConfig.title
+     * tab的显示名字
+     */
+
+    /**
+     * 根据panel, 在tabsConfig中寻找对应名字, 返回其index
+     * @param {string} panel
+     * @param {Array<tabConfig>} tabsConfig
+     * @return 找到的tab index, 或null, 如果没找到
+     */
+    Tab.getIndexForPanel = function (panel, tabsConfig) {
+        var index = _.findIndex(tabsConfig, function(tabConfig) {
+            return tabConfig.panel === panel;
+        });
+
+        if (index > -1) {
+            return index;
+        }
+
+        return null;
+    };
+
+    return Tab;
 });
