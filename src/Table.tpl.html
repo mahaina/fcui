@@ -98,8 +98,9 @@ ${renderHeadTextContent | call(${field}, ${columnIndex})}
     data-ui-type="FcTip"
     data-ui-id="${getTipId | call(${field})}"
 <!-- if: ${field.tip} -->
-    data-ui-content="${renderTipContent | call(${field}, ${columnIndex})}">
+    data-ui-content="${renderTipContent | call(${field}, ${columnIndex})}"
 <!-- /if -->
+>
 </div>
 
 <!-- target: table-sort -->
