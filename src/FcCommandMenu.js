@@ -26,6 +26,8 @@ define(
          * @ignore
          */
         function selectItem(datasource, e) {
+            datasource = datasource || this.datasource;
+
             for (var i in this.subLayers) {
                 this.subLayers[i].hide();
             }
@@ -106,7 +108,7 @@ define(
          */
         function getLayerHtml(control, datasource) {
             var html = '';
-
+            var logTarget = control.main.dataset.uiLogTarget || '';
             for (var i = 0; i < datasource.length; i++) {
                 var dataItem =  datasource[i];
                 var classes = control.helper.getPartClasses('node');
@@ -129,9 +131,9 @@ define(
                     );
                 }
                 html += '<li data-index="' + i + '"'
-                    + ' class="' + classes.join(' ') + '">';
-
-                html += control.getItemHTML(dataItem) + '</li>';
+                    + (logTarget.length ? (' data-ui-log-target="' + logTarget + '-' + dataItem.command +'"') : '')
+                    + ' class="' + classes.join(' ') + '">'
+                    + control.getItemHTML(dataItem) + '</li>';
             }
             return html;
         }
@@ -167,7 +169,17 @@ define(
 
                 // IE下元素始终有`parentNode`，无法判断是否进入了DOM
                 if (!element.parentElement) {
-                    document.body.appendChild(element);
+                    // 修正了layer（包括其派生）在弹窗中滚动的时候会分离的bug
+                    // 参数配置 data-ui-attach="parent"
+                    // 将layer由原来的统一append到body下面，改为append到layer所属的control的父级，再重新定位
+                    // @fixed by wanghongkai, 2015/11/2
+                    if (this.control.attach && this.control.attach === 'parent') {
+                        element.setAttribute('isAttachToParent', true);
+                        this.control.main.parentElement.appendChild(element);
+                    }
+                    else {
+                        document.body.appendChild(element);
+                    }
                 }
             }
 
@@ -181,7 +193,9 @@ define(
          */
         CommandMenuLayer.prototype.createSubLayer = function (element, datasource) {
             var subLayerElement = Layer.create('ul');
-            subLayerElement.className = element.className;
+            subLayerElement.className = element.className
+                + ' '
+                + this.control.helper.getPartClasses('sub-layer').join(' ');
             subLayerElement.innerHTML = getLayerHtml(this.control, datasource);
             document.body.appendChild(subLayerElement);
             return subLayerElement;
@@ -207,15 +221,11 @@ define(
          */
         CommandMenuLayer.prototype.initBehavior = function (element) {
             var me = this;
-            me.control.helper.addDOMEvent(element, 'click', u.partial(selectItem, me.control.datasource));
-            me.control.addGlobalScrollHandler(function () {
-                if (me.control.hasState('active')) {
-                    me.toggle();
-                }
-            });
+            me.control.helper.addDOMEvent(element, 'click', u.bind(selectItem, me.control, null));
             u.each(me.control.datasource, u.partial(createSubLayers, me, element));
             me.control.helper.addDOMEvent(element, 'mouseover', u.partial(layerHoverHandler, me));
-            me.control.helper.addDOMEvent(me.control.main, 'mouseover', u.partial(layerOutHandler, me));
+            me._mouseOverHandler = u.partial(layerOutHandler, me);
+            me.control.helper.addDOMEvent(me.control.main, 'mouseover', me._mouseOverHandler);
         };
 
         /**
@@ -229,7 +239,11 @@ define(
             var children = item.children;
             if (children && children.length > 0) { // 生成二级子菜单。
                 layer.subLayers[index] = layer.createSubLayer(element, children);
-                layer.control.helper.addDOMEvent(layer.subLayers[index], 'click', u.partial(selectItem, children));
+                layer.control.helper.addDOMEvent(
+                    layer.subLayers[index],
+                    'click',
+                    u.bind(selectItem, layer.control,children)
+                );
             }
         }
 
@@ -275,18 +289,19 @@ define(
             var classes = getHiddenClasses(layer);
             lib.removeClasses(subLayerElement, classes);
             Layer.attachTo(subLayerElement, target);
-            var targetOffset = lib.getOffset(target);
-            var left = parseInt(subLayerElement.style.left) + targetOffset.width + 1;
-            var top = parseInt(subLayerElement.style.top) - targetOffset.height;
-            subLayerElement.style.left = left + 'px';
-            subLayerElement.style.top = top + 'px';
+            var targetSubElemet = (target.children || [])[index];
+            lib.dock(targetSubElemet, subLayerElement, lib.DockPosition.TOP_TOP_LEFT_RIGHT);
         }
 
         /**
-         * 菜单浮层销毁 
+         * 菜单浮层销毁
          * @override
          */
         CommandMenuLayer.prototype.dispose = function () {
+            var control = this.control;
+            control.helper.removeDOMEvent(control.main, 'mouseover', this._mouseOverHandler);
+            this._mouseOverHandler = null;
+
             Layer.prototype.dispose.apply(this, arguments);
             for (var i in this.subLayers) {
                 document.body.removeChild(this.subLayers[i]);
@@ -355,38 +370,12 @@ define(
          * @override
          */
         CommandMenu.prototype.initStructure = function () {
-            var helper = this.helper;
             // 增加disabled状态
             if (this.disabled) {
                 this.helper.addStateClasses('disabled');
             }
             if (this.isCommandButton) {
                 this.initCommandButton();
-            }
-            else {
-                switch (this.mode) {
-                    case 'click':
-                        helper.addDOMEvent(
-                            this.main,
-                            'click',
-                            u.bind(this.layer.toggle, this.layer)
-                        );
-                        break;
-                    case 'over':
-                        var elements = [this.main, this.layer.getElement()];
-                        for (var i in this.layer.subLayers) {
-                            elements.push(this.layer.subLayers[i]);
-                        }
-                        Layer.delayHover(
-                            elements,
-                            40,
-                            u.bind(this.layer.show, this.layer),
-                            u.bind(this.layer.hide, this.layer)
-                        );
-                        break;
-                    default:
-                        break;
-                }
             }
         };
 
@@ -600,6 +589,49 @@ define(
                  */
                 name: 'datasource',
                 paint: function (menu) {
+                    if (menu.type === 'FcCommandMenu') {
+                        if (menu.layer) {
+                            menu._clickHandler
+                                ? menu.helper.removeDOMEvent(menu.main, 'click', menu._clickHandler) : '';
+                            menu.layer.dispose();
+                        }
+                        menu.layer = new CommandMenuLayer(menu);
+
+                        // 为commandMenu绑定滚动事件
+                        menu._hasScrollHandler ? '' : menu.addGlobalScrollHandler(function () {
+                            menu._hasScrollHandler = true;
+                            if (menu.layer.control.hasState('active')) {
+                                menu.layer.toggle();
+                            }
+                        });
+
+                        if (!menu.isCommandButton) {
+                            switch (menu.mode) {
+                                case 'click':
+                                    menu._clickHandler = u.bind(menu.layer.toggle, menu.layer);
+                                    menu.helper.addDOMEvent(
+                                        menu.main,
+                                        'click',
+                                        menu._clickHandler
+                                    );
+                                    break;
+                                case 'over':
+                                    var elements = [menu.main, menu.layer.getElement()];
+                                    for (var i in menu.layer.subLayers) {
+                                        elements.push(menu.layer.subLayers[i]);
+                                    }
+                                    Layer.delayHover(
+                                        elements,
+                                        40,
+                                        u.bind(menu.layer.show, menu.layer),
+                                        u.bind(menu.layer.hide, menu.layer)
+                                    );
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
                     menu.layer.repaint();
                 }
             },
