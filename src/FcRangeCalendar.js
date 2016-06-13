@@ -101,7 +101,17 @@ define(
 
                 // IE下元素始终有`parentNode`，无法判断是否进入了DOM
                 if (!element.parentElement) {
-                    document.body.appendChild(element);
+                    // 修正了layer（包括其派生）在弹窗中滚动的时候会分离的bug
+                    // 参数配置 data-ui-attach="parent"
+                    // 将layer由原来的统一append到body下面，改为append到layer所属的control的父级，再重新定位
+                    // @fixed by wanghongkai, 2015/11/2
+                    if (this.control.attach && this.control.attach === 'parent') {
+                        element.setAttribute('isAttachToParent', true);
+                        this.control.main.parentElement.appendChild(element);
+                    }
+                    else {
+                        document.body.appendChild(element);
+                    }
                 }
             }
 
@@ -110,7 +120,17 @@ define(
 
         RangeCalendarLayer.prototype.render = function (element) {
             var calendar = this.control;
-            document.body.appendChild(element);
+            // 修正了layer（包括其派生）在弹窗中滚动的时候会分离的bug
+            // 参数配置 data-ui-attach="parent"
+            // 将layer由原来的统一append到body下面，改为append到layer所属的control的父级，再重新定位
+            // @fixed by wanghongkai, 2015/11/2
+            if (this.control.attach && this.control.attach === 'parent') {
+                element.setAttribute('isAttachToParent', true);
+                this.control.main.parentElement.appendChild(element);
+            }
+            else {
+                document.body.appendChild(element);
+            }
             element.innerHTML = getLayerHtml(calendar);
             calendar.helper.initChildren(element);
 

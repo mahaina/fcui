@@ -1,0 +1,208 @@
+/**
+ * @file FcPriceFactorRegion控件的凤巢定制皮肤
+ * @author Wang Yi(wangyi25@baidu.com)
+ * @date Mon Jun 15 2015
+ */
+
+.@{skin-fc-prefix}-fcpricefactorregion {
+    &-selector-area {
+        float: left;
+
+        .@{skin-fc-prefix}-fcpricefactorregion-region-item {
+            float: left;
+
+            .@{skin-fc-prefix}-fcpricefactorregion-region-name {
+                float: left;
+                width: 50px;
+                line-height: 42px;
+                margin: 0 10px;
+                text-align: center;
+            }
+
+            .@{skin-fc-prefix}-fcpricefactorregion-region-provinces {
+                float: left;
+                width: 460px;
+
+                .@{skin-fc-prefix}-fcpricefactorregion-province-item {
+                    display: inline-block;
+                    width: 80px;
+                    height: 30px;
+                    margin: 5px;
+                    border: 1px solid #D8D8D8;
+                    text-align: center;
+                    cursor: pointer;
+
+                    .@{skin-fc-prefix}-fcpricefactorregion-province-info {
+                        line-height: 30px;
+
+                        &-selected {
+                            background-color: #2F82F5 !important;
+                            color: #FFF;
+                        }
+
+                        .@{skin-fc-prefix}-fcpricefactorregion-region-factor {
+                            margin-left: 5px;
+
+                            em {
+                                color: #F58380;
+                            }
+                        }
+                    }
+
+                    .@{skin-fc-prefix}-fcpricefactorregion-region-available {
+                        background-color: #A3C8FF;
+                        color: #FFF;
+                    }
+
+                    .@{skin-fc-prefix}-fcpricefactorregion-region-unavailable {
+                        cursor: not-allowed !important;
+                    }
+
+                    .@{skin-fc-prefix}-fcpricefactorregion-province-cities-layer {
+                        position: absolute;
+                        z-index: 1;
+                        width: 185px;
+                        border: 1px solid #D8D8D8;
+                        background-color: #F8F8F8;
+                        visibility: hidden;
+
+                        .@{skin-fc-prefix}-fcpricefactorregion-city-item {
+                            float: left;
+                            width: 80px;
+                            height: 30px;
+                            line-height: 30px;
+                            margin: 5px;
+                            border: 1px solid #D8D8D8;
+                            background-color: #FFF;
+                            text-align: center;
+                            cursor: pointer;
+                            overflow: hidden;
+
+                            &-selected {
+                                background-color: #2F82F5 !important;
+                                color: #FFF;
+                            }
+
+                            .@{skin-fc-prefix}-fcpricefactorregion-region-factor {
+                                margin-left: 5px;
+                            }
+                        }
+
+                        .@{skin-fc-prefix}-fcpricefactorregion-region-available {
+                            background-color: #A3C8FF;
+                            color: #FFF;
+                        }
+                    }
+
+                    &:hover {
+                        .@{skin-fc-prefix}-fcpricefactorregion-province-cities-layer {
+                            visibility: visible;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    &-selector-legend {
+        margin: 5px 0;
+        text-align: center;
+
+        &-color {
+            display: inline-block;
+            position: relative;
+            top: 5px;
+            width: 18px;
+            height: 18px;
+            margin: 0 5px;
+            border: 1px solid #D8D8D8;
+
+            &-unavailable {
+                background-color: #FFF;
+            }
+
+            &-available {
+                background-color: #A3C8FF;
+            }
+
+            &-selected {
+                background-color: #2F82F5;
+            }
+        }
+
+        &-text {
+            margin-right: 10px;
+        }
+    }
+
+    &-selected-list {
+        clear: both;
+        width: 560px;
+        height: 80px;
+        margin-top: 10px;
+        border: 1px solid #D8D8D8;
+
+        &-title {
+            float: left;
+            line-height: 80px;
+            padding: 0 10px;
+            border-right: 1px solid #D8D8D8;
+        }
+
+        &-viewer {
+            &-left,
+            &-right {
+                line-height: 80px;
+
+                span {
+                    cursor: pointer;
+                }
+            }
+
+            &-left {
+                float: left;
+            }
+
+            &-right {
+                float: right;
+            }
+
+            &-content {
+                float: left;
+                width: 440px;
+                padding-left: 5px;
+
+                .@{skin-fc-prefix}-fcpricefactorregion-selected-region-item {
+                    display: inline-block;
+                    width: 80px;
+                    height: 30px;
+                    line-height: 30px;
+                    margin: 5px 2px 0;
+                    border: 1px solid #D8D8D8;
+                    background-color: #2F82F5;
+                    color: #FFF;
+                    text-align: center;
+                    overflow: hidden;
+
+                    &-name {
+                        display: inline-block;
+                        width: 60px;
+                        height: 30px;
+                    }
+
+                    .font-icon-times {
+                        position: relative;
+                        float: right;
+                        top: 7px;
+                        right: 3px;
+                        cursor: pointer;
+                    }
+
+                    &-hide {
+                        display: none;
+                    }
+                }
+            }
+        }
+    }
+}

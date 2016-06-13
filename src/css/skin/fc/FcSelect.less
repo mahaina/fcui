@@ -1,0 +1,221 @@
+/**
+ * FCUI
+ * Copyright 2015 Baidu Inc. All rights reserved.
+ *
+ * @file 下拉选择样式
+ * @author wanghongkai
+ */
+@import "../../esui/mixin.less";
+@import "../../esui/variable.less";
+.@{ui-class-prefix}-fcselect {
+    .linear-gradient-background-with-image (
+    top, #ffffff, #f6f6f6, "../../img/esui-combo-arrow.png", right, -6px, #fff);
+    .ellipse-overflow ();
+    .interactive-cursor ();
+    border: 1px solid #D8D8D8;
+    border-radius: 3px 3px 3px 3px;
+    font-size: 12px;
+    height: 17px;
+    line-height: 17px;
+    padding: 3px 3px 3px 5px;
+    width: 50px;
+    padding-right: 20px;
+    outline: none;
+}
+
+.@{ui-class-prefix}-fcselect:hover,
+.@{ui-class-prefix}-fcselect:focus {
+    .linear-gradient-background-with-image (
+    top, #ffffff, #f6f6f6, "../../img/esui-combo-arrow.png", right, -36px, #fff);
+}
+
+.@{ui-class-prefix}-fcselect:active {
+    .linear-gradient-background-with-image (
+    top, #f6f6f6, #ffffff, "../../img/esui-combo-arrow.png", right, -36px, #fff);
+}
+
+.@{ui-class-prefix}-fcselect-active,
+.@{ui-class-prefix}-fcselect-active:hover,
+.@{ui-class-prefix}-fcselect-active:focus {
+    .linear-gradient-background-with-image (
+    top, #ffffff, #f6f6f6, "../../img/esui-combo-arrow.png", right, -67px, #fff);
+}
+
+.@{ui-class-prefix}-fcselect-layer {
+    .reset-list ();
+    .box-sizing (border-box);
+    background: none repeat scroll 0 0 #FFFFFF;
+    border: 1px solid #A8ADB6;
+    font-size: 12px;
+    overflow-x: hidden;
+    *height: 152px;
+    max-height: 152px;
+    overflow-y: auto;
+    padding: 0 1px;
+    position: absolute;
+    text-align: left;
+    z-index: @layer-z-index;
+}
+
+.@{ui-class-prefix}-fcselect-item {
+    color: #333333;
+    .interactive-cursor ();
+    line-height: 22px;
+    margin: 0 0 1px;
+    padding: 0 4px;
+}
+
+.@{ui-class-prefix}-fcselect-item-disabled {
+    color: #999;
+}
+
+.@{ui-class-prefix}-fcselect-item-fcselected {
+    background-color: #E0E0E0;
+    border: 1px solid #DDDDDD;
+    padding: 0 3px;
+}
+
+.@{ui-class-prefix}-fcselect-item:hover {
+    background-color: #F1F1F1;
+}
+
+.@{ui-class-prefix}-fcselect-item span {
+    display: block;
+    .ellipse-overflow ();
+}
+
+.@{ui-class-prefix}-fcselect-layer-hidden {
+    display: none;
+}
+
+.@{ui-class-prefix}-fcselect-disabled,
+.@{ui-class-prefix}-fcselect-read-only {
+    color: #999;
+    border-color: #D8D8D8;
+    &:hover,
+    &:focus {
+        .linear-gradient-background-with-image (
+        top, #ffffff, #f6f6f6, "../../img/esui-combo-arrow.png", right, -6px, #f3f3f3);
+    }
+}
+
+/** 验证 */
+.@{ui-class-prefix}-fcselect-validity-invalid {
+    border: 1px solid red;
+}
+.@{ui-class-prefix}-fcselect-validity-label {
+    display:block;
+    margin-top: 5px;
+}
+.@{ui-class-prefix}-fcselect-validity-label-invalid {
+    .background(url(../../img/esui-icon-alert.png), no-repeat, 15px, center, #FEDBDC);
+    border: 1px solid #F0CCCC;
+    color: #dd6767;
+    padding-left: 50px;
+}
+
+// 普通下拉菜单
+.skin-ui-fc-fcselect {
+    .set-select(10px);
+}
+
+.skin-ui-fc-fcselect-active {
+    .set-select-active;
+}
+
+.skin-ui-fc-fcselect-layer {
+    .set-select-layer();
+}
+
+.skin-ui-fc-fcselect-item {
+    .set-select-item(10px);
+}
+
+// 表格行内修改下拉菜单
+.skin-ui-fc-inline-fcselect {
+    .set-select(5px);
+}
+
+.skin-ui-fc-inline-fcselect-layer {
+    .set-select-layer;
+}
+
+.skin-ui-fc-inline-fcselect-item {
+    .set-select-item(5px);
+}
+// 分组样式
+.skin-ui-fc-fcselect-item-group {
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid @skin-fc-border-color-gray-fade;
+}
+
+// select的其他高度，附加在容器上实现其他高度
+.ui-fc-fcselect-height28 {
+    height: 26px;
+    line-height: 26px;
+
+    &:after {
+        top: 5px;
+    }
+}
+
+.ui-fc-fcselect-height26 {
+    height: 24px;
+    line-height: 24px;
+
+    &:after {
+        top: 4px;
+    }
+}
+// 全选
+.set-allselector() {
+    padding: 3px 20px 3px 5px;
+    line-height: 20px;
+    height: 16px;
+    width: 18px;
+    &:after {
+        top: 3px;
+    }
+}
+.@{skin-fc-prefix}-allselector {
+    .set-select(0);
+    .set-allselector();
+    &:hover,
+    &:active,
+    &:focus,
+    &-active,
+    &-active:hover,
+    &-active:active,
+    &-active:focus {
+        .set-select-active();
+        .set-allselector();
+    }
+}
+.@{skin-fc-prefix}-allselector-layer {
+    .set-select-layer();
+    .@{skin-fc-prefix}-allselector-item {
+        .set-select-item(10px);
+    }
+}
+
+/* select的label样式 */
+.@{skin-fc-prefix}-fcselect-label {
+    margin-right: 10px;
+}
+
+/* 下拉button */
+.@{skin-fc-prefix}-droplayerbutton {
+    .set-select(10px);
+    &-active,
+    &-active:hover,
+    &-active:active,
+    &-active:focus {
+        .set-select-active();
+    }
+}
+
+/** 验证 */
+.@{skin-fc-prefix}-fcselect-validity-invalid {
+    border: 1px solid @skin-fc-invalid-border-color;
+}

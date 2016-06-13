@@ -15,7 +15,7 @@
         .@{skin-fc-prefix}-tree-node-indicator-collapsed,
         .@{skin-fc-prefix}-tree-node-indicator-expanded {
             width: 16px;
-            height: 16px;
+            height: 15px;
             margin: 7px 6px 7px 0;
         }
         
@@ -58,6 +58,7 @@
     }
     
     .@{skin-fc-prefix}-tree-content-wrapper:not(.@{skin-fc-prefix}-tree-content-wrapper-selected) {
+        cursor: pointer;
         &:hover {
             background: @skin-fc-bg-color-hover-blue;
         }

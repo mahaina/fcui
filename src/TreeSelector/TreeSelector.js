@@ -35,6 +35,12 @@ define(function (require) {
         },
 
         /**
+         * 已选默认最大值
+         * @type {string}
+         */
+        limit: null,
+
+        /**
          * 控件默认属性
          * @type {Object}
          */
@@ -105,7 +111,7 @@ define(function (require) {
         + '<div class="selector-chosen"></div>'
         + '<div class="selector-total-remove">'
         + '<span class="chosen-limit-num">'
-        + '<span class="chosen-num">0</span>/${limit}'
+        + '<span class="chosen-num">0</span>/<span class="total-num">${limit}</span>'
         + '</span>'
         + '<span class="remove-all-chosen">全部删除</span>'
         + '</div></div></div>';
@@ -160,7 +166,7 @@ define(function (require) {
         var selectorHtml = lib.format(TreeSelectorTemplate, {
             chosenTitle: properties.chosenList.title,
             optionTitle: properties.optionList.title,
-            limit: properties.chosenList.limit
+            limit: me.limit || properties.chosenList.limit
         });
         wrapper.html(selectorHtml);
 
@@ -341,6 +347,7 @@ define(function (require) {
                     id = target.attr('data-val');
                     me.removeChosen(id);
                     recoverAddButton(me, id);
+                    me.fire('removeitem');
                 }
             });
 
@@ -352,12 +359,14 @@ define(function (require) {
                     && !target.hasClass('added')) {
                     id = target.attr('data-val');
                     me.addNode(id);
+                    me.fire('additem');
                 }
             });
 
         // 全部删除
         $(me.main).find('.remove-all-chosen').on('click', function () {
             me.delAllChosenNode();
+            me.fire('removeall');
         });
     }
 
@@ -443,7 +452,7 @@ define(function (require) {
      * @param {Array} arr 添加的数组
      */
     TreeSelector.prototype.upChosenNode = function (id, ids, arr) {
-        if (this.isOverlimit(id, arr, this.properties.chosenList.limit)) {
+        if (this.isOverlimit(id, arr, this.limit || this.properties.chosenList.limit)) {
             return;
         }
         var newArr = structureArr(this, ids, arr);
@@ -472,7 +481,8 @@ define(function (require) {
             // 已选状态恢复为未选
             optionIndex[id].isAdd = false;
             this.fire('overlimit', {
-                num: newTotal
+                num: newTotal,
+                id: id
             });
             return true;
         }

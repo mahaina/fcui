@@ -146,9 +146,11 @@ define(function() {
             element.__resizeListeners__.splice(element.__resizeListeners__.indexOf(fn), 1);
             if (!element.__resizeListeners__.length) {
                     element.removeEventListener('scroll', scrollListener);
+                if (element.__resizeTriggers__ && element.__resizeTriggers__.parentNode === element) {
                     element.__resizeTriggers__ = !element.removeChild(element.__resizeTriggers__);
             }
         }
+    }
     }
 })();
 });

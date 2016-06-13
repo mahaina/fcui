@@ -21,11 +21,6 @@ define(function (require) {
          + '</div>';
     
     /**
-     * Sidebar的title所占高度
-     */
-    var SIDEBAR_HEADER_HEIGHT = 39;
-    
-    /**
      * 处理修复Sidebar高度的延迟时间（ms）
      */
     var DELAY_GAP = 50;
@@ -49,10 +44,12 @@ define(function (require) {
      * @type {Object} defaultOptions
      * defaultOptions.speed {number} 默认动画时间（ms）
      * defaultOptions.itemtype {string} 数据项展示类型（'single'、 'multiple'）
+     * defaultOptions.sidebarHeaderHeight {number} Sidebar的title所占高度
      */
     var defaultOptions = {
         speed: 0,
-        itemtype: 'single'
+        itemtype: 'single',
+        sidebarHeaderHeight: 39
     };
     
     /**
@@ -167,7 +164,7 @@ define(function (require) {
         var containerHeight = this.getContainerHeight();
         if (!isNaN(containerHeight) && containerHeight > 0) {
             var itemContentHeight = containerHeight  
-                - SIDEBAR_HEADER_HEIGHT - this._itemsHeight;
+                - this.sidebarHeaderHeight - this._itemsHeight;
             itemContentHeight = itemContentHeight > 0 ? itemContentHeight : 0;
             for (var i = 0, len = this._itemContents.length; i < len; i++){
                 this._itemContents[i].style.height = itemContentHeight + 'px';

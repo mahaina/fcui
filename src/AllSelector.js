@@ -26,6 +26,13 @@ define(function (require, exports) {
     var NONE_OPTION = 'none';
 
     /**
+     * 选择了某些行，但条目数少于当前页
+     * @const
+     * @type {string}
+     */
+    var SELECT_LESS_THAN_PAGE_OPTIONS = 'lessmulti';
+
+    /**
      * 当前页全选选项
      * @const
      * @type {string}
@@ -48,6 +55,7 @@ define(function (require, exports) {
     function AllSelector(options) {
         options.datasource = [
             {text: '', value: NONE_OPTION},
+            {text: '', value: SELECT_LESS_THAN_PAGE_OPTIONS},
             {text: '选择当前页', value: CURRENT_PAGE_OPTIONS},
             {text: '选择全部', value: ALL_OPTIONS}
         ];
@@ -62,6 +70,13 @@ define(function (require, exports) {
      * @type {string}
      */
     AllSelector.NONE_OPTION = NONE_OPTION;
+
+    /**
+     * 选择了某些行，但条目数少于当前页
+     * @const
+     * @type {string}
+     */
+    AllSelector.SELECT_LESS_THAN_PAGE_OPTIONS = SELECT_LESS_THAN_PAGE_OPTIONS;
 
     /**
      * 类的static常量
@@ -246,6 +261,7 @@ define(function (require, exports) {
 
         var checkboxElement = $(this.main).find('.ui-allselector-checkbox');
         switch (value) {
+            case SELECT_LESS_THAN_PAGE_OPTIONS:
             case CURRENT_PAGE_OPTIONS:
                 checkboxElement.prop('checked', false);
                 checkboxElement.prop('indeterminate', true);
@@ -270,6 +286,7 @@ define(function (require, exports) {
         var value = this.get('value');
         var content = '';
         switch (value) {
+            case SELECT_LESS_THAN_PAGE_OPTIONS:
             case CURRENT_PAGE_OPTIONS:
                 content = '已选择当前页' + count + '项';
                 break;

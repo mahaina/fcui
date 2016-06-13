@@ -51,6 +51,7 @@ define(function (require) {
                     me.allSelector.on('change', _.bind(me.allSelectorChangeHandler, me));
                     table.on('rowselected', _.bind(me.rowSelectChangeHandler, me));
                     table.on('rowunselected', _.bind(me.rowSelectChangeHandler, me));
+                    table.on('cancelselect', _.bind(me.cancleSelectHandler, me));
                     if (coverHead) {
                         me.coverAllSelector = me.renderAllSelector(coverHead);
                         me.coverAllSelector.set('value', me.allSelector.get('value'));
@@ -95,22 +96,38 @@ define(function (require) {
             var allSelector = this.allSelector;
             var selectedState = allSelector.get('value');
             var isSelectedAll = false;
+            var selectedIndexTotal = 0;
             switch (selectedState) {
                 case AllSelector.ALL_OPTIONS: // 全选
                     table.set('selectedIndex', -1);
                     isSelectedAll = true;
+                    selectedIndexTotal = (table.summary || {}).totalCount || 0;
                     break;
                 case AllSelector.CURRENT_PAGE_OPTIONS: // 当前页全选
-                    if (!this._selectFromRow) {
-                        table.set('selectedIndex', -1);
-                    }
-                    this._selectFromRow = false;
+                    table.set('selectedIndex', -1);
+                    selectedIndexTotal = table.datasource.length;
                     break;
                 case AllSelector.NONE_OPTION:
                     table.set('selectedIndex', []);
                     break;
+                case AllSelector.SELECT_LESS_THAN_PAGE_OPTIONS:
+                    selectedIndexTotal = table.selectedIndex.length;
+                    break;
             }
-            this.coverAllSelector.set('value', this.allSelector.get('value'));
+
+            var coverAllSelector = this.coverAllSelector;
+            if (coverAllSelector) {
+                coverAllSelector.set('value', allSelector.get('value'));
+            }
+
+            if (selectedIndexTotal) {
+                // 当前table的两层head，显示上层head的数目提示
+                var selector = (coverAllSelector && coverAllSelector.layer.getZIndex() > allSelector.layer.getZIndex())
+                    ? coverAllSelector
+                    : allSelector;
+                selector.set('count', selectedIndexTotal);
+            }
+
             table.fire('selectall', {isSelectedAll: isSelectedAll});
         },
 
@@ -123,7 +140,6 @@ define(function (require) {
             var selectedIndex = table.get('selectedIndex');
             var allSelector = this.allSelector;
             var coverAllSelector = this.coverAllSelector;
-            this._selectFromRow = true;
             if (selectedIndex === -1 || selectedIndex.length) {
                 var selectedIndexTotal = 0;
                 if (selectedIndex === -1) {
@@ -132,19 +148,43 @@ define(function (require) {
                 else {
                     selectedIndexTotal = selectedIndex.length;
                 }
-                allSelector.set('value', AllSelector.CURRENT_PAGE_OPTIONS);
-                allSelector.set('count', selectedIndexTotal);
+                var options = selectedIndexTotal === table.datasource.length
+                    ? AllSelector.CURRENT_PAGE_OPTIONS
+                    : AllSelector.SELECT_LESS_THAN_PAGE_OPTIONS;
+
+                allSelector.set('value', options);
                 if (coverAllSelector) {
-                    coverAllSelector.set('value', AllSelector.CURRENT_PAGE_OPTIONS);
-                    coverAllSelector.set('count', selectedIndexTotal);
+                    coverAllSelector.set('value', options);
                 }
+
+                // 当前table的两层head，显示上层head的数目提示
+                var selector = (coverAllSelector && coverAllSelector.layer.getZIndex() > allSelector.layer.getZIndex())
+                    ? coverAllSelector
+                    : allSelector;
+                selector.set('count', selectedIndexTotal);
             }
             else {
                 allSelector.set('value', AllSelector.NONE_OPTION);
                 coverAllSelector && coverAllSelector.set('value', AllSelector.NONE_OPTION);
             }
-        }
+        },
 
+        /**
+         * 取消全选和半选状态，供table之外对象调用。
+         *     该方法被执行且生效的条件是table的所有行已被取消选中状态，即selectedIndex为空
+         * @param {Event} e e
+         */
+        cancleSelectHandler: function (e) {
+            var table = this.target;
+            var selectedIndex = table.get('selectedIndex');
+            if (selectedIndex && selectedIndex.length === 0) {
+                var allSelector = this.allSelector;
+                var coverAllSelector = this.coverAllSelector;
+
+                allSelector.set('value', AllSelector.NONE_OPTION);
+                coverAllSelector && coverAllSelector.set('value', AllSelector.NONE_OPTION);
+            }
+        }
     });
     fcui.registerExtension(TableAllSelector);
     return TableAllSelector;

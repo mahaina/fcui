@@ -128,6 +128,7 @@ define(
             'default': {
                 stepValue: 0.01,
                 isShowTimelyTip: true,
+                isPreventInput: false,
                 decimalPlace: 2,
                 min: 0.01,
                 max: 1
@@ -255,6 +256,7 @@ define(
             var inputEvent = ('oninput' in input)
                 ? 'input' : 'propertychange';
             helper.addDOMEvent(input, inputEvent, this.onInputChange());
+            helper.addDOMEvent(input, 'keydown', this.onInputKeyDown());
             helper.addDOMEvent(input, 'focus', this.onInputFocus());
             helper.addDOMEvent(input, 'blur', this.onInputBlur());
             helper.addDOMEvent(
@@ -268,6 +270,37 @@ define(
                 _.bind(this.onPlaceholderClick, this)
             );
             this.on('inputchange', this.enableOrDisableArrowHandler);
+        };
+
+        /**
+         * keypress 事件的处理函数
+         *
+         * @return {Function}
+         */
+        NumberBox.prototype.onInputKeyDown = function () {
+            var me = this;
+            return function (e) {
+                me.preventInput(e);
+            };
+        };
+
+        /**
+         * 阻止键盘输入处理函数
+         *
+         * @param {Event} e event事件
+         */
+        NumberBox.prototype.preventInput = function (e) {
+            var value = e.target.value;
+            var decimal = this.decimalPlace;
+            var isPreventInput = this.isPreventInput;
+            // 超过小数精度,禁止输入
+            if (isPreventInput) {
+                var reg = new RegExp('\\d+\\.\\d' + '{' + decimal + '}');
+                if (reg.test(value)) {
+                    // 不阻止delete键和退格键
+                    e.keyCode === 8 || e.keyCode === 46 ? '' : e.preventDefault();
+                }
+            }
         };
 
         NumberBox.prototype.onPlaceholderClick = function () {

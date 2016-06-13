@@ -563,5 +563,74 @@ define(function (require) {
             .setAttribute(el, ANIMATE_TASK_ID_KEY, animateIds.join(','));
     };
 
+    /**
+     * 获取元素的宽、高、left、top值
+     *
+     * @param {HTMLElement} el 元素
+     * @return {{left: number, top: number, width: number, height: number}}
+     */
+    function offset(el) {
+        var obj = el.getBoundingClientRect();
+        var ret = {
+            left: obj.left + window.pageXOffset,
+            top: obj.top + window.pageYOffset,
+            width: Math.round(obj.width),
+            height: Math.round(obj.height)
+        };
+        return ret;
+    }
+
+    function offsetParent(el) {
+        var parent = el.offsetParent || document.body;
+        while (parent && !/^(?:body|html)$/i.test(parent.nodeName)
+            && libDom.getComputedStyle(parent, 'position') === 'static') {
+            parent = parent.offsetParent;
+        }
+        return parent;
+    }
+
+    /**
+     * 相对于非static父级的position
+     *
+     * @param {HTMLElement} el 元素
+     * @return {Object} top、left、width、height
+     */
+    function position(el) {
+        var offsetP = offsetParent(el);
+        var offsetS  = offset(el);
+        var parentOffset = /^(?:body|html)$/i.test(offsetP.nodeName) ? {top: 0, left: 0} : offset(offsetP);
+        offsetS.top  -= parseFloat(libDom.getComputedStyle(offsetP, 'margin-top')) || 0;
+        offsetS.left -= parseFloat(libDom.getComputedStyle(offsetP, 'margin-top')) || 0;
+        parentOffset.top  += parseFloat(libDom.getComputedStyle(offsetP, 'border-top-width')) || 0;
+        parentOffset.left += parseFloat(libDom.getComputedStyle(offsetP, 'border-left-width')) || 0;
+        var ret = {
+            top: offsetS.top - parentOffset.top,
+            left: offsetS.left - parentOffset.left,
+            width: offsetS.width,
+            height: offsetS.height
+        };
+        return ret;
+    }
+
+    /**
+     * 匹配el最近的一个满足selector的dom
+     *
+     * @param {HTMLElement} el 元素
+     * @param {string} selector 选择器
+     * @return {HTMLElement}
+     */
+    function closest(el, selector) {
+        while (el && !exports.match(el, selector)) {
+            el = !/^(?:body|html)$/i.test(el.nodeName) && el.parentNode;
+        }
+        return el;
+    }
+
+    u.extend(exports, {
+        offset: offset,
+        position: position,
+        closest: closest
+    });
+
     return exports;
 });

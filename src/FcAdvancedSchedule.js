@@ -167,42 +167,43 @@ define(function (require) {
      */
     function initBody(schedule) {
         lib.g(getId(schedule, 'body')).innerHTML = ''
-            + getBodyTimeHtml(schedule) // 拼接html: 头部time列表
-            + getBodyHourHtml(schedule) // 拼接html: 头部选择列
-            + getBodyDayHtml(schedule) // 拼接html: 星期列表
-            + getBodyItemHtml(schedule); // 拼接html: 时间item列表
+        + getBodyTimeHtml(schedule, 1) // 拼接html: 头部time列表
+        + getBodyHourHtml(schedule) // 拼接html: 头部选择列
+        + getBodyDayHtml(schedule) // 拼接html: 星期列表
+        + getBodyItemHtml(schedule) // 拼接html: 时间item列表
+        + getBodyTimeHtml(schedule); // 拼接html: 底部time列表
     }
 
     /**
      * 拼接html: body 头部time列表
      * @param  {Schedule} schedule Schedule实例
+     * @param  {number} startTime 初始时间
      * @inner
      * @return {string} 头部time列表的html片段
      */
-    function getBodyTimeHtml(schedule) {
+    function getBodyTimeHtml(schedule, startTime) {
         var me = schedule;
-        var html = [];
-
-        var timelineClass = getClass(me, 'time-line');
+        var html = [];// odd-time-line
+        startTime = !startTime ? 0 : 1;
+        var timelineClass = getClass(me, startTime ? 'odd-time-line' : 'time-line');
         var bodyHeadId    = getId('body-head');
         html.push(
             '<div class="', timelineClass, '" id="',
             bodyHeadId + '">'
         );
 
+        var endValue = startTime ? 23 : 24;
         var timeHClass = getClass(me, 'time-head');
-        for (var i = 0; i <= 24; i = i + 2) {
+        for (var i = startTime; i <= endValue; i = i + 2) {
             html.push(
                 '<div class="', timeHClass,
                 '" data-time="', i, '" ',
                 'id="', getId(me, 'time-head' + i), '">',
-                 i + ':00',
-                 '</div>'
+                i + ':00',
+                '</div>'
             );
         }
-
         html.push('</div>');
-
         return html.join('');
     }
 
@@ -259,8 +260,8 @@ define(function (require) {
         var dayClass = getClass(me, 'day');
         var dayTpl = ''
             + '<div class="' + dayClass + '">'
-                + '<input type="checkbox" id="${dayId}" value="${value}">'
-                + '&nbsp;<label for="${dayId}">${dayWord}</label>'
+            + '<input type="checkbox" id="${dayId}" value="${value}">'
+            + '&nbsp;<label for="${dayId}">${dayWord}</label>'
             + '</div>';
 
         var dayTexts = me.dayTexts;
@@ -295,16 +296,24 @@ define(function (require) {
 
         var timeTpl = ''
             + '<div class="${timeClass}"'
-                + ' id="${itemId}"'
-                + ' data-day="${dayIndex}"'
-                + ' data-time-item="1"'
-                + ' data-info="${rawInfo}"'
-                + ' data-time="${timeIndex}">'
+            + ' id="${itemId}"'
+            + ' data-day="${dayIndex}"'
+            + ' data-time-item="1"'
+            + ' data-info="${rawInfo}"'
+            + ' data-time="${timeIndex}">'
             + '</div>';
 
         var timeBClass = getClass(me, 'time-body');
         var timeBId    = getId(me, 'time-body');
+        var vCoverLineClass = getClass(me, 'v-cover-line');
+        var hCoverLineClass = getClass(me, 'h-cover-line');
+
         html.push('<div id="', timeBId, '" class="', timeBClass, '">');
+        html.push(''
+            + '<div id="' + getId(me, 'left-coverline') + '" class="' + vCoverLineClass + '"></div>'
+            + '<div id="' + getId(me, 'right-coverline') + '" class="' + vCoverLineClass + '"></div>'
+            + '<div id="' + getId(me, 'bottom-coverline') + '" class="' + hCoverLineClass + '"></div>'
+            );
 
         // 7天
         var lineClass = getClass(me, 'line');
@@ -351,7 +360,12 @@ define(function (require) {
     function repaintView(schedule, value) {
         var me = schedule;
         me.fire('beforerepaintview');
-        var selectedClass = me.selectedOnClass || helper.getPartClasses(me, 'time-selected');
+        var curClasses = {
+            selectedClass: me.selectedOnClass || helper.getPartClasses(me, 'time-selected'),
+            selectedClass2: me.selectedOnClass || helper.getPartClasses(me, 'time-selected-selected')
+        };
+        var selectedClass = curClasses.selectedClass;
+
         var selectedOffClass = me.selectedOffClass || '';
         var hoverClass = helper.getPartClasses(me, 'time-hover');
         var thirdClass = me.thirdClass || '';
@@ -387,19 +401,30 @@ define(function (require) {
                 var item = lib.g(getId(me, 'time_' + i + '_' + j));
                 var val  = (value[i] == null) ? 0 : value[i][j];
 
+                for (var key in curClasses) {
+                    if (curClasses.hasOwnProperty(key)) {
+                        lib.removeClasses(item, curClasses[key]);
+                    }
+                }
                 // 根据value,设置item的选中状态
-                if (+val === 1) {
+                if (+val === me.availableValue) {
                     lib.addClasses(item, selectedClass);
                 }
+                else if (+val === me.selecedValue) {
+                    lib.addClasses(item, curClasses.selectedClass2);
+                }
                 else if (!val) {
-                    lib.removeClasses(item, selectedClass);
                     if (selectedOffClass) {
                         item.className += ' ' + selectedOffClass;
                     }
                 }
                 // 两种状态共存
-                else if (+val === 2) {
-                    lib.removeClasses(item, selectedClass);
+                else if (+val > me.selecedValue) {
+                    for (var key2 in curClasses) {
+                        if (curClasses.hasOwnProperty(key2)) {
+                            lib.removeClasses(item, curClasses[key2]);
+                        }
+                    }
                     item.className += ' ' + thirdClass;
                 }
                 item.setAttribute('data-value', val);
@@ -423,36 +448,56 @@ define(function (require) {
      */
     function createSelectedLineCoverTip(schedule, arr, parent, index) {
         var me = schedule;
-        var i = index;
 
-        // 将当前星期的checkbox先初始化为不选中
-        var checkInput = lib.g(getId(me, 'line-state' + i));
-        checkInput.checked = false;
-
-        // 对于连续选中大于3天的进行遮罩处理
-        var patt = /1{3,}/g;
+        // 对于连续选中大于有相同系数的项的进行遮罩处理
         var statusStr = arr.join('');
-        var result;
+
         var coverClass = getClass(me, 'continue-covertimes');
         var coverTpl = ''
-                + '<div class="${coverClass}">'
-                    + '<strong>${text}</strong>'
-                + '</div>';
+            + '<div class="${coverClass}">'
+            + '<strong>${text}</strong>'
+            + '</div>';
 
-        while ((result = patt.exec(statusStr)) != null) {
-            var length = result[0].length;
-            var start = result.index;
-            var end = start + length;
+        var checkInput = lib.g(getId(me, 'line-state' + index));
+        // 计算本行已选中项目个数；
+        var curLineSelected = statusStr.split(me.selecedValue).length - 1;
+        // 根据已选数量和可选数量是否相同来决定本checkBox是否选中
+        checkInput.checked = (curLineSelected === me.baseItemNumber[index]
+            && me.baseItemNumber[index] > 0) ? true : false;
+        // 记录前面最后一个系数值
+        var lastValue = -1;
+        var tipArr = [];
+        for (var i = 0; i < 24; i++) {
+            if (arr[i] === me.availableValue && me.initValueArr[index][i] > -1) {
+                // 根据当前系数与前面系数是否相同，来决定是否放在一个遮罩里面
+                if (me.initValueArr[index][i] !== lastValue
+                    || tipArr[tipArr.length - 1].end + 1 < i) {
+                    tipArr.push({
+                        start: i,
+                        end: i,
+                        value: me.initValueArr[index][i]
+                    });
+                    lastValue = me.initValueArr[index][i];
+                }
+                else {
+                    tipArr[tipArr.length - 1].end = i;
+                }
+            }
+        }
+        // 创建本行所有遮罩
+        for (var j = 0; j < tipArr.length; j++) {
+            var start = tipArr[j].start;
+            var end = tipArr[j].end + 1;
+            var length = end - start;
 
             var coverDiv = document.createElement('aside');
-            var cssStyle = ';width:' + length * 25
-                 + 'px;top:0;left:' + start * 25 + 'px;';
-            // 设置星期checkbox的选中值
-            checkInput.checked = length === 24 ? true : false;
+            // 减一是因为遮罩右侧要有一个像素的border；
+            var cssStyle = ';width:' + (length * 25 - 1)
+                + 'px;top:0;left:' + (start * 25 - 1) + 'px;';
 
             coverDiv.setAttribute('data-start-time', start);
             coverDiv.setAttribute('data-end-time', end);
-            coverDiv.setAttribute('data-day', i);
+            coverDiv.setAttribute('data-day', index);
             coverDiv.className = coverClass;
             coverDiv.style.cssText += cssStyle;
 
@@ -461,8 +506,7 @@ define(function (require) {
                 {
                     start: start,
                     end: end,
-                    text: length === 24
-                        ? '全天投放' : start + ':00-' + end + ':00',
+                    text: tipArr[j].value,
                     coverClass: me.coverClass || getClass(me, 'covertimes-tip')
                 }
             );
@@ -485,8 +529,28 @@ define(function (require) {
      * @param {DOM} element 挂载事件的DOM元素
      */
     function coverTipOverHandler(element) {
-
-        element.style.display = 'none';
+        if (element.tagName.toLowerCase() === 'aside') {
+            lib.addClass(element, 'covertimes-hide');
+            var startTime = +element.getAttribute('data-start-time');
+            var endTime = +element.getAttribute('data-end-time');
+            var day = +element.getAttribute('data-day');
+            var leftCoverLine = lib.g(getId(this, 'left-coverline'));
+            var cssText = 'left:' + (startTime * 25 - 1)
+                + 'px; top:' + (day * 25 - 1) + 'px; display:block;';
+            leftCoverLine.style.cssText = cssText;
+            var rightCoverLine = lib.g(getId(this, 'right-coverline'));
+            cssText = 'left:' + (endTime * 25 - 1)
+                + 'px; top:' + (day * 25 - 1) + 'px; display:block;';
+            rightCoverLine.style.cssText = cssText;
+            var bottomCoverLine = lib.g(getId(this, 'bottom-coverline'));
+            cssText = 'left:' + (startTime * 25 - 1)
+                + 'px;width:'+ (endTime - startTime) * 25 + 'px;top:' + (day * 25 + 25)
+                + 'px;'+';display:block;';
+            bottomCoverLine.style.cssText = cssText;
+        }
+        else {
+            element.style.display = 'none';
+        }
     }
 
     /**
@@ -603,7 +667,6 @@ define(function (require) {
         var target = lib.event.getTarget(e);
 
         if (target.nodeName.toLowerCase() !== 'input') {
-
             return;
         }
 
@@ -617,9 +680,11 @@ define(function (require) {
         var timeValue = rawValueCopy[dayIndex];
 
         for (var i = 0, len = timeValue.length; i < len; i++) {
-
-            timeValue[i] = dayState ? 1 : me.unSelectedValue[dayIndex][i];
-
+            if (timeValue[i] > 0) {
+                timeValue[i] = dayState
+                    ? me.selecedValue
+                    : me.initSelectedValue[dayIndex][i];
+            }
         }
 
         me.setRawValue(rawValueCopy);
@@ -634,6 +699,7 @@ define(function (require) {
      */
     function shortcutClickHandler(e) {
         var target = lib.event.getTarget(e);
+
         if (!target || !lib.hasAttribute(target, 'data-item')) {
             return;
         }
@@ -786,19 +852,54 @@ define(function (require) {
         var day  = parseInt(element.getAttribute('data-day'), 10);
         var info = element.getAttribute('data-info');
 
-        // 如果用户传入了提示信息，就使用传入的，否则默认显示当前的时间点信息
-        var tipText = lib.format(timeTipTpl,
-            {
-                time: info ? info : ('<strong>' + time
-                    + ':00</strong>&nbsp;—&nbsp;<strong>'
-                    + (time + 1) + ':00</strong>'),
-                text: me.selectMode === 'block' ? '点击/拖动鼠标选择' : '',
-                timeId: getId(me, 'timeitem-tip-head'),
-                textId: getId(me, 'timeitem-tip-body'),
-                timeClass: getClass(me, 'timeitem-tip-head'),
-                textClass: getClass(me, 'timeitem-tip-body')
+        var curValue = element.getAttribute('data-value');
+        var tipText = '';
+
+        var timeValue = '';
+        var textValue = '';
+        if (+curValue === me.baseValue) {
+            timeValue = '未投放时段,';
+            textValue = '不可选择';
+        }
+        else if (+curValue > me.baseValue) {
+            var txtValue = me.initValueArr[day][time];
+            var startTime = time;
+            var endTime = time + 1;
+
+            while (startTime > 0
+                && me.initSelectedValue[day][startTime - 1] === me.availableValue
+                && me.initValueArr[day][startTime - 1] === txtValue) {
+                startTime -= 1;
             }
-        );
+            while (endTime < 24
+                && me.initSelectedValue[day][endTime] === me.availableValue
+                && me.initValueArr[day][endTime] === txtValue) {
+                endTime += 1;
+            }
+            timeValue = info ? info : ('<span>' + startTime
+                + ':00</span>&nbsp;—&nbsp;<span>'
+                + (endTime) + ':00</span>');
+            textValue = '系数：' + (txtValue === -1 ? '未设置' : txtValue);
+        }
+        else {
+            // 如果用户传入了提示信息，就使用传入的，否则默认显示当前的时间点信息
+            timeValue = info ? info : ('<strong>' + time
+                + ':00</strong>&nbsp;—&nbsp;<strong>'
+                + (time + 1) + ':00</strong>');
+            textValue = me.selectMode === 'block' ? '点击/拖动鼠标选择' : '';
+        }
+        tipText = lib.format(timeTipTpl,
+                {
+                    time: timeValue,
+                    text: textValue,
+                    timeId: getId(me, 'timeitem-tip-head'),
+                    textId: getId(me, 'timeitem-tip-body'),
+                    timeClass: getClass(me, 'timeitem-tip-head'),
+                    textClass: getClass(me, 'timeitem-tip-body')
+                }
+            );
+
+
 
         var tipId = getId(me, 'timeitem-tip');
 
@@ -821,12 +922,10 @@ define(function (require) {
             if (time >= startCT
                 && time < endCT
                 && day === CoverDay) {
-
-                item.style.display = 'none';
+                lib.addClass(item, 'covertimes-hide');
             }
             else {
-
-                item.style.display = 'block';
+                lib.removeClass(item, 'covertimes-hide');
             }
         }
     }
@@ -837,11 +936,9 @@ define(function (require) {
      * @param {Event} e 事件参数
      */
     function timeOutHandler(e) {
-
         var target = lib.event.getTarget(e);
 
         if (!target || !target.getAttribute('data-time-item')) {
-
             return;
         }
 
@@ -853,6 +950,13 @@ define(function (require) {
 
         // 隐藏tip
         hidePromptTip(this, getId(this, 'timeitem-tip'));
+
+        var timebody = lib.g(getId(this, 'time-body'));
+        var timeCovers = timebody.getElementsByTagName('aside');
+
+        for (var i = 0, len = timeCovers.length; i < len; i++) {
+            lib.removeClass(timeCovers[i], 'covertimes-hide');
+        }
     }
 
     var getTimeBodyMoveHandler; // drag mousemove的句柄
@@ -993,10 +1097,13 @@ define(function (require) {
             for (var j = minXCell; j <= maxXCell; j++) {
 
                 if (rawValueCopy[i][j] === 1) {
-                    rawValueCopy[i][j] = me.unSelectedValue[i][j];
+                    rawValueCopy[i][j] = 2;
+                }
+                else if (rawValueCopy[i][j] === 2) {
+                    rawValueCopy[i][j] = 1;
                 }
                 else {
-                    rawValueCopy[i][j] = 1;
+                    rawValueCopy[i][j] = me.unSelectedValue[i][j];
                 }
 
             }
@@ -1033,7 +1140,7 @@ define(function (require) {
         }
         else {
             rangePos.y = mousepos.y - dragStartPos.y < 0
-            ? timeBodyPos[0] : timeBodyPos[2];
+                ? timeBodyPos[0] : timeBodyPos[2];
         }
 
         var cellrange = {startcell: {}, endcell: {}};
@@ -1199,6 +1306,9 @@ define(function (require) {
 
         for (var i = 0, len = inputs.length; i < len; i++) {
             inputs[i][state] = value;
+            if (state === 'readonly') {
+                inputs[i].disabled = value;
+            }
         }
     }
 
@@ -1211,9 +1321,11 @@ define(function (require) {
     function setHourCheckboxState(schedule, state, value) {
         var hourHead = lib.g(getId(schedule, 'hour-head'));
         var inputs = hourHead.getElementsByTagName('input');
-
         _.each(inputs, function (item) {
             item[state] = value;
+            if (state === 'readonly') {
+                item.disabled = value;
+            }
         });
     }
 
@@ -1243,13 +1355,54 @@ define(function (require) {
         schedule.setRawValue(rawValueCopy);
     }
 
+    /**
+     * 只读时，阻止单击事件
+     * @param {Object} schedule 当前控件
+     * @param {boolean} readonly 是否只读
+     */
+    function setHourReadonly(schedule, readonly) {
+        if (readonly) {
+            var timebody = lib.g(getId(schedule, 'time-body'));
+            timebody.onClick = function () {
+                return false;
+            };
+        }
+    }
+
     proto = _.extend(proto, {
+        /**
+         * 基础状态值
+         *
+         * @type {Number}
+         */
+        baseValue: 0,
+
+        /**
+         * 可选状态值
+         *
+         * @type {Number}
+         */
+        availableValue: 1,
+        /**
+         * 选中状态值
+         *
+         * @type {Number}
+         */
+        selecedValue: 2,
+
+        /**
+         * 每天的基础可选项数量
+         *
+         * @type {Array}
+         */
+        baseItemNumber: [0, 0, 0, 0, 0, 0, 0],
+
         /**
          * 控件类型
          *
          * @type {string}
          */
-        type: 'FcSchedule',
+        type: 'FcAdvancedSchedule',
 
         /**
          * 选择模式，分为'single'和'block'
@@ -1319,17 +1472,17 @@ define(function (require) {
                 + '<input type="hidden" name="${name}" id="${inputId}"/>'
                 + '<div class="${bodyClass}" id="${bodyId}"></div>'
                 + '<div class="${headClass}">'
-                    + '<div class="${helpClass}">'
-                        + '<div class="${helpSelectedClass}"></div>'
-                        + '<div class="${helpTextClass}">'
-                            + '${helpSelected}'
-                        + '</div>'
-                        + '<div class="${helpUnselectedClass}"></div>'
-                        + '<div class="${helpTextClass}">${help}</div>'
-                    + '</div>'
-                    + '<div class="${shortcutClass}" id="${shortcutId}">'
-                        + '${shortcutHtml}'
-                    + '</div>'
+                + '<div class="${helpClass}">'
+                + '<div class="${helpSelectedClass}"></div>'
+                + '<div class="${helpTextClass}">'
+                + '${helpSelected}'
+                + '</div>'
+                + '<div class="${helpUnselectedClass}"></div>'
+                + '<div class="${helpTextClass}">${help}</div>'
+                + '</div>'
+                + '<div class="${shortcutClass}" id="${shortcutId}">'
+                + '${shortcutHtml}'
+                + '</div>'
                 + '</div>';
 
             this.main.innerHTML = lib.format(
@@ -1431,7 +1584,7 @@ define(function (require) {
                     // 填充hidden input的值
                     var value = schedule.stringifyValue(rawValue);
                     lib.g(getId(schedule, 'value-input')).value =
-                            value == null ? '' : value;
+                        value == null ? '' : value;
 
                     repaintView(schedule, rawValue);
                 }
@@ -1439,6 +1592,7 @@ define(function (require) {
             {
                 name: 'disabled',
                 paint: function (schedule, value) {
+
                     setDayCheckboxState(schedule, 'disabled', value);
                     setHourCheckboxState(schedule, 'disabled', value);
                 }
@@ -1446,13 +1600,9 @@ define(function (require) {
             {
                 name: 'readonly',
                 paint: function (schedule, value) {
-                    setDayCheckboxState(schedule, 'disabled', value);
-                    setHourCheckboxState(schedule, 'disabled', value);
-                    var timebody = lib.g(getId(schedule, 'time-body'));
-                    schedule.helper.removeDOMEvent(timebody, 'mousedown', timeBodyDownHandler);
-                    if (!value) {
-                        schedule.helper.addDOMEvent(timebody, 'mousedown', timeBodyDownHandler);
-                    }
+                    setDayCheckboxState(schedule, 'readonly', value);
+                    setHourCheckboxState(schedule, 'readonly', value);
+                    setHourReadonly(schedule, value);
                 }
             }
         ),
@@ -1513,8 +1663,28 @@ define(function (require) {
          *
          * @public
          * @param {Array} rawValue 控件的值
+         * @param {boolean} isInit 是否是初始化本控件时的赋值
+         * @param {Array} initValue 控件每个时段的系数数组
          */
-        setRawValue: function (rawValue) {
+        setRawValue: function (rawValue, isInit, initValue) {
+            var me = this;
+            if (isInit) {
+                me.initSelectedValue = rawValue;
+                me.initValueArr = initValue;
+                for (var i = 0; i < 7; i++) {
+                    me.baseItemNumber[i] = 0;
+                    for (var j = 0; j < 24; j++) {
+                        if (rawValue[i][j] === me.availableValue) {
+                            // 计算每一行的可选值数量；
+                            me.baseItemNumber[i] += 1;
+                        }
+                    }
+                    if (me.baseItemNumber[i] === 0) {
+                        lib.g(getId(me, 'line-state' + i)).disabled = true;
+                    }
+
+                }
+            }
 
             this.setProperties({rawValue: rawValue});
         },
@@ -1532,7 +1702,7 @@ define(function (require) {
 
         /**
          * 按照坐标选择
-          * @param {...Array.<number>} coord 当前坐标[星期，小时]
+         * @param {...Array.<number>} coord 当前坐标[星期，小时]
          */
         select: function (coord) {
             dealValueByCoord(this, 1, [].slice.call(arguments));
@@ -1566,7 +1736,10 @@ define(function (require) {
             helper.afterDispose(this);
             // dispose时，移除timebody的click,防止内存泄露
             var timebody = lib.g(getId(this, 'time-body'));
-            timebody.onClick = null;
+            // 在dispose时，如果控件不在当前页面中，此时timebody为Null
+            if (timebody) {
+                timebody.onClick = null;
+            }
         }
     });
 

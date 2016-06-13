@@ -1,0 +1,181 @@
+ /**
+ * ESUI (Enterprise Simple UI)
+ * Copyright 2015 Baidu Inc. All rights reserved.
+ *
+ * @file slider样式
+ * @author Hou Yuxin
+ */
+@import "../../esui/mixin.less";
+@import "../../esui/variable.less";
+
+.@{ui-class-prefix}-fcslider-disabled {
+    .@{ui-class-prefix}-fcslider-container {
+        cursor: not-allowed!important;
+    }
+
+    .@{ui-class-prefix}-fcslider-valueBar {
+        cursor: not-allowed!important;
+        background-color: #9ec6ff!important;
+    }
+
+    .@{ui-class-prefix}-fcslider-mainBar {
+        cursor: not-allowed!important;
+        background-color: #d8d8d8!important;
+    }
+
+    .@{ui-class-prefix}-fcslider-slideLabel {
+        background-color: #9ec6ff!important;
+        cursor: not-allowed!important;
+        &:after {
+            border-top-color: #9ec6ff!important;
+        }
+    }
+
+    .@{ui-class-prefix}-fcslider-leftRule {
+        background-color: #9ec6ff!important;
+        cursor: not-allowed!important;
+    }
+
+    .@{ui-class-prefix}-fcslider-rightRule {
+        background-color: #d8d8d8!important;
+        cursor: not-allowed!important;
+    }
+
+    .@{ui-class-prefix}-fcslider-minLabel {
+        color: #d8d8d8!important;
+        cursor: not-allowed!important;
+    }
+
+    .@{ui-class-prefix}-fcslider-maxLabel {
+        color: #d8d8d8!important;
+        cursor: not-allowed!important;
+    }
+
+    .@{ui-class-prefix}-fcslider-slideButton {
+        cursor: not-allowed!important;
+        &:hover {
+            .box-shadow(#000 0px 0px 2px)!important;
+        }
+    }
+
+}
+
+.@{ui-class-prefix}-fcslider-container {
+    position: relative;
+    height: 20px;
+    padding-top: 10px;
+    .user-select();
+
+    .@{ui-class-prefix}-fcslider-valueBar {
+        position: absolute;
+        height: 10px;
+        background-color: #4593FF;
+        left: 0px;
+        cursor: pointer;
+        z-index: 1;
+        .border-radius(4px);
+    }
+
+    .@{ui-class-prefix}-fcslider-mainBar {
+        position: absolute;
+        height: 10px;
+        width: 100%;
+        background-color: #9C9C9C;
+        cursor: pointer;
+        z-index: 1;
+        .border-radius(4px);
+    }
+
+    .@{ui-class-prefix}-fcslider-slideLabel {
+        position: absolute;
+        height: 20px;
+        width: 50px;
+        left: 75px;
+        top: -20px;
+        background-color: #4593FF;
+        color: #FFFFFF;
+        font-size: 12px;
+        text-align: center;
+        line-height: 20px;
+        cursor: default;
+        .border-radius(3px);
+
+        &:after {
+            position: absolute;
+            content: '';
+            height: 0px;
+            width: 0px;
+            top: 20px;
+            left: 20px;
+            border: solid transparent;
+            border-top-color: #4593FF;
+            border-width: 5px;
+        }
+    }
+
+    .@{ui-class-prefix}-fcslider-leftRule {
+        position: absolute;
+        width: 1px;
+        height: 22px;
+        top: 5px;
+        left: 10px;
+        background-color: #4593FF;
+        cursor: default;
+        z-index: 0;
+    }
+
+    .@{ui-class-prefix}-fcslider-rightRule {
+        position: absolute;
+        width: 1px;
+        height: 22px;
+        top: 5px;
+        right: 9px;
+        background-color: #9C9C9C;
+        cursor: default;
+        z-index: 0;
+    }
+
+    .@{ui-class-prefix}-fcslider-minLabel {
+        position: absolute;
+        width: 30px;
+        left: 5px;
+        top: 30px;
+        font-size: 12px;
+        text-align: left;
+        color: #9C9C9C;
+        cursor: default;
+        line-height: 1;
+    }
+
+    .@{ui-class-prefix}-fcslider-maxLabel {
+        position: absolute;
+        width: 30px;
+        right: 5px;
+        top: 30px;
+        font-size: 12px;
+        text-align: right;
+        color: #9C9C9C;
+        cursor: default;
+        line-height: 1;
+    }
+
+    .@{ui-class-prefix}-fcslider-slideButton {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        left: 92px;
+        top: 7px;
+        border: 4px solid #EFEFEF;
+        background-color: #9C9C9C;
+        cursor: pointer;
+        z-index: 1;
+        .border-radius(10px);
+        .box-shadow(#000 0px 0px 2px);
+
+        &:hover {
+            .box-shadow(#000 0px 0px 4px);
+        }
+    }
+}
+
+
