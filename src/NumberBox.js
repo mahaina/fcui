@@ -212,6 +212,9 @@ define(
          * @return {string} 提示信息
          */
         NumberBox.prototype.getTip = function () {
+            if (this.tip) {
+                return '' + this.tip;
+            }
             // 没有最小值的时候
             var str = '有效范围:';
             if (this.min !== Number.NEGATIVE_INFINITY
